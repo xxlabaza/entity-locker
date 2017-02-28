@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+  <modelVersion>4.0.0</modelVersion>
+    
+  <groupId>com.xxlabaza.test</groupId>
+  <artifactId>lock</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+    
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <netbeans.hint.license>My_Apache2</netbeans.hint.license>
+  </properties>
+
+  <name>Entity locker</name>
+  <description>
+    Sample for entity locker util class.
+  </description>
+  <url>https://github.com/xxlabaza/entity-locker</url>
+  <inceptionYear>2017</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <url>https://github.com/xxlabaza/entity-locker</url>
+    <connection>scm:git:https://github.com/xxlabaza/entity-locker.git</connection>
+    <developerConnection>scm:git:https://github.com/xxlabaza/entity-locker.git</developerConnection>
+  </scm>
+  
+  <issueManagement>
+    <system>Github</system>
+    <url>https://github.com/xxlabaza/entity-locker/issues</url>
+  </issueManagement>
+
+  <developers>
+    <developer>
+      <name>Artem Labazin</name>
+      <email>xxlabaza@gmail.com</email>
+    </developer>
+  </developers>
+    
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+    
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.16.10</version>
+    </dependency>
+  </dependencies>
+</project>
