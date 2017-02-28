@@ -41,26 +41,41 @@ public class EntityLockerTest {
 
     @Test
     @SneakyThrows
-    public void myTest () {
+    public void lock () {
         val user = new User(1, "");
         val threadsCount = RESULT_NAME.length();
 
         val countDownLatch = new CountDownLatch(threadsCount);
         for (int i = 0; i < threadsCount; i++) {
-            new Thread(new NameChanger(user, countDownLatch)).start();
+            new Thread(new NameChangerLock(user, countDownLatch)).start();
         }
         countDownLatch.await(5, SECONDS);
 
         assertEquals(RESULT_NAME, user.getName());
     }
 
-    private static class NameChanger implements Runnable {
+    @Test
+    @SneakyThrows
+    public void withinLock () {
+        val user = new User(1, "");
+        val threadsCount = RESULT_NAME.length();
 
-        private final User user;
+        val countDownLatch = new CountDownLatch(threadsCount);
+        for (int i = 0; i < threadsCount; i++) {
+            new Thread(new NameChangerWithinLock(user, countDownLatch)).start();
+        }
+        countDownLatch.await(5, SECONDS);
 
-        private final CountDownLatch latch;
+        assertEquals(RESULT_NAME, user.getName());
+    }
 
-        NameChanger (User user, CountDownLatch latch) {
+    private static class NameChangerLock implements Runnable {
+
+        protected final User user;
+
+        protected final CountDownLatch latch;
+
+        NameChangerLock (User user, CountDownLatch latch) {
             this.user = user;
             this.latch = latch;
         }
@@ -76,6 +91,28 @@ public class EntityLockerTest {
                 entityLock.unlock();
                 latch.countDown();
             }
+        }
+    }
+
+    private static class NameChangerWithinLock implements Runnable {
+
+        private final User user;
+
+        private final CountDownLatch latch;
+
+        NameChangerWithinLock (User user, CountDownLatch latch) {
+            this.user = user;
+            this.latch = latch;
+        }
+
+        @Override
+        public void run () {
+            EntityLocker.withinLock(user.getClass(), user.getId(), () -> {
+                String name = user.getName();
+                String newName = name + RESULT_NAME.charAt(name.length());
+                user.setName(newName);
+            });
+            latch.countDown();
         }
     }
 

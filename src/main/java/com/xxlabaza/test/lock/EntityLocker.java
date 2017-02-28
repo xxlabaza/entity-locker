@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.EqualsAndHashCode;
+import lombok.SneakyThrows;
 import lombok.val;
 
 /**
@@ -47,6 +48,19 @@ public final class EntityLocker {
         return entityLock;
     }
 
+    @SneakyThrows
+    public static void withinLock (Class<?> entityType, Object id, Action action) {
+        EntityLock entityLock = lock(entityType, id);
+        try {
+            action.invoke();
+        } finally {
+            entityLock.unlock();
+        }
+    }
+
+    private EntityLocker () {
+    }
+
     @EqualsAndHashCode(exclude = "lock")
     public static class EntityLock {
 
@@ -70,6 +84,8 @@ public final class EntityLocker {
         }
     }
 
-    private EntityLocker () {
+    public interface Action {
+
+        void invoke () throws Exception;
     }
 }
