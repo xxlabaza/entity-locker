@@ -15,29 +15,34 @@
  */
 package com.xxlabaza.test.lock;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import lombok.EqualsAndHashCode;
+import lombok.val;
 
 /**
- * 
+ *
  * @author Artem Labazin <xxlabaza@gmail.com>
  * @since 28.02.2017
  */
 public final class EntityLocker {
 
-    private static final Set<EntityLock> LOCKS;
+    private static final Map<EntityLock, EntityLock> LOCKS;
 
     static {
-        LOCKS = Collections.synchronizedSet(new HashSet<>());
+        LOCKS = new ConcurrentHashMap<>();
     }
 
     public static synchronized EntityLock lock (Class<?> entityType, Object id) {
-        EntityLock entityLock = new EntityLock(entityType, id);
-        LOCKS.add(entityLock);
+        val container = new EntityLock(entityType, id);
+
+        EntityLock entityLock = LOCKS.putIfAbsent(container, container);
+        if (entityLock == null) {
+            entityLock = container;
+        }
+
         entityLock.lock();
         return entityLock;
     }

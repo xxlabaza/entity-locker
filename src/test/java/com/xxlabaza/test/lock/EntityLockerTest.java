@@ -15,6 +15,7 @@
  */
 package com.xxlabaza.test.lock;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertEquals;
 
 import com.xxlabaza.test.lock.EntityLocker.EntityLock;
@@ -26,7 +27,7 @@ import lombok.val;
 import org.junit.Test;
 
 /**
- * 
+ *
  * @author Artem Labazin <xxlabaza@gmail.com>
  * @since 28.02.2017
  */
@@ -41,30 +42,41 @@ public class EntityLockerTest {
     @Test
     @SneakyThrows
     public void myTest () {
-        User user = new User(1, "");
-
+        val user = new User(1, "");
         val threadsCount = RESULT_NAME.length();
 
-        CountDownLatch latch = new CountDownLatch(threadsCount);
+        val countDownLatch = new CountDownLatch(threadsCount);
         for (int i = 0; i < threadsCount; i++) {
-            new Thread(() -> {
-                EntityLock lock = EntityLocker.lock(user.getClass(), user.getId());
-                addCharToName(user);
-                lock.unlock();
-                latch.countDown();
-            }).start();
+            new Thread(new NameChanger(user, countDownLatch)).start();
         }
-
-        latch.await();
+        countDownLatch.await(5, SECONDS);
 
         assertEquals(RESULT_NAME, user.getName());
     }
 
-    // Gets current name value and adds next char to it
-    private void addCharToName (User user) {
-        String name = user.getName();
-        String newName = name + RESULT_NAME.charAt(name.length());
-        user.setName(newName);
+    private static class NameChanger implements Runnable {
+
+        private final User user;
+
+        private final CountDownLatch latch;
+
+        NameChanger (User user, CountDownLatch latch) {
+            this.user = user;
+            this.latch = latch;
+        }
+
+        @Override
+        public void run () {
+            EntityLock entityLock = EntityLocker.lock(user.getClass(), user.getId());
+            try {
+                String name = user.getName();
+                String newName = name + RESULT_NAME.charAt(name.length());
+                user.setName(newName);
+            } finally {
+                entityLock.unlock();
+                latch.countDown();
+            }
+        }
     }
 
     @Data
